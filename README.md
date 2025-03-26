@@ -28,4 +28,6 @@ localhost: MySQL 서버 주소 (현재 로컬)<br>
 3306: 기본 포트<br>
 yolo_project: 사용할 DB 이름<br>
 <br><br>
-yolo 모델은 yolo.py로 만들어서 사용.
+yolo 모델은 yolo.py로 만들어서 사용.<br>
+<br><br>
+images/ 폴더 생성하기
