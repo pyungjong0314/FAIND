@@ -31,3 +31,19 @@ yolo_project: 사용할 DB 이름<br>
 yolo 모델은 yolo.py로 만들어서 사용.<br>
 <br><br>
 images/ 폴더 생성하기
+<br><br>
+실행 방법<br>
+컴퓨터 2대 사용 시<br>
+카메라 역할만 하는 컴퓨터에서 
+```
+python client.py
+```
+서버 역할하는 컴퓨터에서
+```
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+<br><br>
+컴퓨터 1대만 사용 시
+```
+python webcam_main.py
+```
