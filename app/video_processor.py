@@ -121,7 +121,7 @@ def process_video(video_path=os.path.join(PROJECT_DIR, "test_video3.mp4")):
             cv2.putText(frame, f"{track_id} - person", (xmin + 5, ymin - 8),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
 
-        # 🔥 두 개의 가상의 선을 영상에 표시 (입구/출구 라벨 추가)
+        # 두 개의 가상의 선을 영상에 표시 (입구/출구 라벨 추가)
         cv2.line(frame, (OUTSIDE_LINE, 0), (OUTSIDE_LINE, frame.shape[0]), RED, 2)
         cv2.putText(frame, "outside line", (OUTSIDE_LINE - 40, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, RED, 2)
