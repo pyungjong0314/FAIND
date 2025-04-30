@@ -16,6 +16,10 @@
 FAIND/
 ├── docker-compose.yml
 ├── camera_client/
+│   ├── client.py
+│   ├── requirements.txt
+│   └── run_client.bat
+├── camera_client_with_docker/
 │   └── client.py
 ├── main_server/
 │   ├── main.py
@@ -37,7 +41,8 @@ FAIND/
 ## 🧰 요구사항
 
 - Docker + docker-compose
-- 로컬 Linux 환경에서 `/dev/video0` 사용 가능해야 함
+- 윈도우 환경이라면, camera_client를 사용. run_client.bat 실행하기
+- camera_client_with_docker 실행 시, 로컬 Linux 환경에서 `/dev/video0` 사용 가능해야 함
 
 ---
 
