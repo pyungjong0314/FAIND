@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: video_user
+      POSTGRES_PASSWORD: video_pass
+      POSTGRES_DB: video_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  yolo_server:
+    build:
+      context: ./yolo_server
+    ports:
+      - "8001:8001"
+    volumes:
+      - saved_images:/app/saved_people
+
+  main_server:
+    build:
+      context: ./main_server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - yolo_server
+      - postgres_db
+
+  camera_client:
+    build:
+      context: ./camera_client
+    depends_on:
+      - main_server
+    devices:
+      - "/dev/video0:/dev/video0"
+
+  web_server:
+    build:
+      context: ./web_server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - main_server
+    volumes:
+      - saved_images:/app/saved_people
+    env_file:
+      - ./web_server/.env
+    
+
+volumes:
+  pgdata:
