@@ -1,49 +1,105 @@
-### 확인해야 할 사항
-client.py만 웹캠 컴퓨터에서 돌아가고, 나머지는 서버 컴퓨터에서 돌아감.<br>
-client.py 실행 컴퓨터(클라이언트)는 웹캠이 필요함.<br>
-client.py 코드의 B_IP에는 실제 서버 컴퓨터의 IP를 입력할 것.<br>
-<br><br>
-서버 컴퓨터에는 8000 포트가 열려있어야 함. ->cmd를 관리자 권한으로 실행하고 아래 명령어 입력하기.
+## 📦 기능 요약
+
+- 실시간 영상 전송 (WebSocket)
+- YOLOv5 기반 객체 감지
+- 감지 결과 DB 저장 (PostgreSQL)
+- 감지된 사람이면 이미지 저장 + DB에 경로 저장
+- 관리자 기능 (삭제/상태 업데이트)
+- 감지 이미지 웹에서 조회 가능 (`/images/...`)
+- REST API 기반 조회 시스템
+
+---
+
+## 🗂️ 디렉토리 구조
+
 ```
-netsh advfirewall firewall add rule name="FastAPI 8000" dir=in action=allow protocol=TCP localport=8000
+FAIND/
+├── docker-compose.yml
+├── camera_client/
+│   └── client.py
+├── main_server/
+│   ├── main.py
+│   ├── db.py
+│   └── requirements.txt
+├── yolo_server/
+│   ├── app/
+│   │   ├── yolo_main.py
+│   │   └── yolo_model.py
+│   └── requirements.txt
+├── web_server/
+│   ├── web_main.py
+│   ├── .env
+│   └── requirements.txt
 ```
-서버 컴퓨터에는 mysql이 설치되어 있어야 함. 테스트로 사용한 방법은 아래와 같음.
+
+---
+
+## 🧰 요구사항
+
+- Docker + docker-compose
+- 로컬 Linux 환경에서 `/dev/video0` 사용 가능해야 함
+
+---
+
+## 🚀 실행 방법
+
+```bash
+# 실행
+docker-compose up --build
 ```
-CREATE DATABASE yolo_project CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE yolo_project;
-CREATE TABLE captures (
-    filename VARCHAR(255) PRIMARY KEY,
-    path VARCHAR(255),
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+
+> 실행 후 주요 서비스는 다음과 같이 접근 가능합니다:
+
+| 서비스 | 주소 |
+|--------|------|
+| WebSocket 수신 (main_server) | `ws://localhost:8000/ws/stream` |
+| YOLO 추론 API (내부용) | `http://yolo_server:8001/predict` |
+| 감지 결과 REST API | `http://localhost:8080/api/detections` |
+| 감지 이미지 조회 | `http://localhost:8080/images/<filename>.jpg` |
+
+---
+
+## 🔐 관리자 기능 (인증 방식)
+
+관리자 API를 호출할 때는 다음 헤더를 포함해야 합니다:
+
+```http
+X-Admin-Token: <your_token>
 ```
-DB 연결 시
+
+> 토큰은 `web_server/.env` 파일 내에 `ADMIN_TOKEN=...`으로 정의됨
+
+---
+
+## 📡 주요 API
+
+### 감지 결과 조회
+```http
+GET /api/detections?limit=10&label=person&start_time=...&end_time=...
 ```
-# db.py
-DATABASE_URL = "mysql+pymysql://root:1234@localhost:3306/yolo_project"
+
+### 감지 결과 삭제
+```http
+DELETE /api/delete/{id}
+Headers: X-Admin-Token: your_token
 ```
-root: 사용자명<br>
-1234: 비밀번호<br>
-localhost: MySQL 서버 주소 (현재 로컬)<br>
-3306: 기본 포트<br>
-yolo_project: 사용할 DB 이름<br>
-<br><br>
-yolo 모델은 yolo.py로 만들어서 사용.<br>
-<br><br>
-images/ 폴더 생성하기
-<br><br>
-실행 방법<br>
-컴퓨터 2대 사용 시<br>
-카메라 역할만 하는 컴퓨터에서 
+
+### 상태 업데이트
+```http
+PUT /api/update-status/{id}?new_status=processed
+Headers: X-Admin-Token: your_token
 ```
-python client.py
-```
-서버 역할하는 컴퓨터에서
-```
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-<br><br>
-컴퓨터 1대만 사용 시
-```
-python webcam_main.py
-```
+
+---
+
+## ⚠️ 주의사항
+
+- 카메라 송신 클라이언트는 Docker에서 `--device=/dev/video0`로 장치 접근 허용해야 함
+- `.env` 파일은 Git에 업로드하지 말고 로컬에서만 관리하세요
+- PostgreSQL의 데이터는 volume으로 영속화됩니다 (`pgdata`)
+
+---
+
+## 📜 라이선스
+
+MIT License
