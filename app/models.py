@@ -4,7 +4,8 @@ class Person:
         self.passed_lines = []
         self.direction = None
         self.first_location = first_location
-        self.items = set()
+        self.items = {} # bbox 형식 {xmin, ymin, xmax, ymax}
+        self.feature_vector = None
 
     def update_position(self, center_x):
         from video_processor import OUTSIDE_LINE, INSIDE_LINE

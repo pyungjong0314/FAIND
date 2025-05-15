@@ -3,17 +3,13 @@ import datetime
 import numpy as np
 from ultralytics import YOLO
 from deep_sort_realtime.deepsort_tracker import DeepSort
-from config import YOLO_MODEL_PATH, CONFIDENCE_THRESHOLD, OUTSIDE_LINE, INSIDE_LINE
-from utils import apply_mosaic_to_head
+from utils import apply_mosaic_to_head, extract_feature_vector
 from models import Person
 import os
 
 # YOLO 모델 및 추적기 초기화
-model = YOLO(YOLO_MODEL_PATH)
+model = YOLO("yolov8n.pt")
 tracker = DeepSort(max_age=50)
-
-# 얼굴 검출기 로드
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 # 이동 방향 감지
 persons = {}
@@ -29,10 +25,20 @@ RED = (0, 0, 255)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
 
-def process_video(video_path=os.path.join(PROJECT_DIR, "test_video3.mp4")):
+os.makedirs("images", exist_ok=True) # 사람 이미지 저장할 디렉토리 생성
+os.makedirs("images/items", exist_ok=True) # 소지품 이미지 저장할 디렉토리 생성
+
+
+def is_overlapping(box1, box2):
+    x1_min, y1_min, x1_max, y1_max = box1
+    x2_min, y2_min, x2_max, y2_max = box2
+    return not (x1_max < x2_min or x2_max < x1_min or y1_max < y2_min or y2_max < y1_min)
+
+
+def process_video():
     global OUTSIDE_LINE, INSIDE_LINE, persons, exit_persons, entry_persons
 
-    video_cap = cv2.VideoCapture("test_video3.mp4")
+    video_cap = cv2.VideoCapture("test_video5.mp4")
 
     frame_count = 0
 
@@ -63,7 +69,8 @@ def process_video(video_path=os.path.join(PROJECT_DIR, "test_video3.mp4")):
                 continue
             class_name = results.names[class_id]
             
-            width, height = xmax - xmin, ymax - ymin
+            width = xmax - xmin
+            height = ymax - ymin
             bbox = [xmin, ymin, width, height]
             
             if class_name == "person":
@@ -87,39 +94,56 @@ def process_video(video_path=os.path.join(PROJECT_DIR, "test_video3.mp4")):
             person = persons[track_id]
             person.update_position(center_x)
             
-            # **사람과 겹치는 소지품 저장**
-            for item_name, (ixmin, iymin, ixmax, iymax) in detected_items:
-                person.items.add(item_name)  # 소지품 추가
-                # if (xmin < ixmin < xmax and ymin < iymin < ymax) or (xmin < ixmax < xmax and ymin < iymax < ymax):
-                #     person.items.add(item_name)  # 소지품 추가
+            for item_name, (ixmin, iymin, iwidth, iheight) in detected_items:
+                ixmax = ixmin + iwidth
+                iymax = iymin + iheight
+                item_center_x = (ixmin + ixmax) // 2
+
+                if OUTSIDE_LINE <= item_center_x <= INSIDE_LINE:
+                    if item_name not in person.items:
+                        person.items[item_name] = (ixmin, iymin, ixmax, iymax)
+
+                        # 이미지 저장
+                        item_crop = frame[int(iymin):int(iymax), int(ixmin):int(ixmax)]
+                        if item_crop.size != 0:
+                            safe_item_name = item_name.replace(" ", "_")
+                            item_filename = f"{track_id}_{safe_item_name}.jpg"
+                            cv2.imwrite(f"images/items/{item_filename}", item_crop)
+
 
             # 이동 방향이 특정된 경우, 모자이크 처리 후 이미지 저장
             if person.direction and person.direction not in person.passed_lines:
                 frame_copy = frame.copy()
-
-                # 얼굴 감지 및 모자이크 처리
-                gray_frame = cv2.cvtColor(frame_copy, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
                 
-                frame_copy = apply_mosaic_to_head(frame_copy, xmin, ymin, xmax, ymax)
-                # 바운딩 박스 영역만 크롭 후 저장
-                person_crop = frame_copy[ymin:ymax, xmin:xmax]  # 바운딩 박스 영역 자르기
+                # (1) 모자이크 전에 crop
+                person_crop = frame_copy[ymin:ymax, xmin:xmax]
                 
                 if person_crop.size != 0: # 빈 이미지 방지
+                    # (2) Re-ID feature 추출 및 저장
+                    person.feature_vector = extract_feature_vector(person_crop)
+                    
+                    # (3) 모자이크 적용 후 이미지 저장
+                    frame_copy = apply_mosaic_to_head(frame_copy, xmin, ymin, xmax, ymax)                
                     filename = f"{person.direction}_{track_id}.jpg"
-                    cv2.imwrite(f"images/{filename}", person_crop)
+                    cv2.imwrite(f"images/{filename}", frame_copy[ymin:ymax, xmin:xmax])
 
-                if person.direction == "exit":
-                    exit_persons.append({"image": filename, "items": list(person.items)})
-                else:
-                    entry_persons.append({"image": filename, "items": list(person.items)})
+                    if person.direction == "exit":
+                        exit_persons.append({"image": filename, "items": list(person.items.keys())})
+                    elif person.direction == "entry":
+                        entry_persons.append({"image": filename, "items": list(person.items.keys())})
 
-                person.passed_lines.append(person.direction) 
+                    person.passed_lines.append(person.direction) # 중복 저장을 방지하기 위해 최종 방향 추가
 
             # Bounding Box 그리기
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), GREEN, 2)
             cv2.putText(frame, f"{track_id} - person", (xmin + 5, ymin - 8),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
+            
+            # 각 사람의 소지품 bbox 그리기
+            for item_name, (ixmin, iymin, ixmax, iymax) in person.items.items():
+                cv2.rectangle(frame, (int(ixmin), int(iymin)), (int(ixmax), int(iymax)), RED, 2)
+                cv2.putText(frame, f"{track_id} - {item_name}", (int(ixmin) + 5, int(iymin) - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
+
 
         # 두 개의 가상의 선을 영상에 표시 (입구/출구 라벨 추가)
         cv2.line(frame, (OUTSIDE_LINE, 0), (OUTSIDE_LINE, frame.shape[0]), RED, 2)

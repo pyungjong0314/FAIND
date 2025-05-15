@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from video_processor import process_video, entry_persons, exit_persons
-from config import IMAGE_DIR
 
 router = APIRouter()
 
