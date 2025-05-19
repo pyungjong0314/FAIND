@@ -1,47 +1,75 @@
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 
 export const SearchWrapper = styled.div`
-  box-sizing: border-box;
-  width: 90%;
+  width: 100%;
   max-width: 800px;
-  background-color: white;
+  margin: 20px auto;
+  padding: 16px 32px;
+  background-color: #ffffff;
   border-radius: 16px;
-  padding: 20px;
-  margin-top: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+`;
 
+export const SearchTitle = styled.h2`
+  font-size: 22px;
+  color: #2d736c;
+  text-align: center;
+  margin-bottom: 24px;
+`;
+
+export const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-`
+`;
 
-export const SearchText = styled.div`
-  color: #2D736C;
+export const Label = styled.label`
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+`;
+
+export const Input = styled.input`
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  background-color: #fafafa;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #2d736c;
+    background-color: #fff;
+  }
+`;
+
+export const ButtonRow = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+`;
+
+export const Button = styled.button`
+  padding: 14px 32px;
+  background-color: #2d736c;
+  color: #fff;
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 10px;
-`
-
-export const SearchBox = styled.div`
-  height: 150px;
-  background-color: #f9f9f9;
+  border: none;
   border-radius: 12px;
-  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.05);
-  padding: 16px;
-`
+  cursor: pointer;
 
-export const searchBoxDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-`
-
-export const SearchBoxLabel = styled.div`
-  width: 10%;
-`
-
-export const SearchBoxInputText = styled.input`
-  width: 80%;
-`
-
-export const SearchBoxButton = styled.button`
-
-`
+  &:hover {
+    background-color: #1f5e51;
+  }
+`;

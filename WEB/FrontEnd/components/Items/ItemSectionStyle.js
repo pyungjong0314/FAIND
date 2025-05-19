@@ -1,48 +1,72 @@
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 
 export const ItemsWrapper = styled.div`
-  width: 90%;
+  width: 100%;
   max-width: 800px;
-  margin-top: 30px;
-
+  margin: 40px auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-`
+  gap: 24px;
+`;
 
 export const Item = styled.div`
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
-  padding: 16px;
-
   display: flex;
-  align-items: center;
-`
+  align-items: flex-start;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+`;
 
 export const ItemImage = styled.div`
-  height: 100px;
-  width: 100px;
-  background-color: #eee;
-  border-radius: 10px;
-  margin-right: 20px;
+  width: 120px;
+  height: 120px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
   flex-shrink: 0;
-`
+  margin-right: 24px;
+
+  @media (max-width: 600px) {
+    margin-right: 0;
+    margin-bottom: 14px;
+  }
+`;
 
 export const ItemText = styled.div`
   display: flex;
   flex-direction: column;
-`
+  justify-content: space-between; /* 상단 정보 + 하단 날짜/시간 분리 */
+  flex: 1;                         /* 남은 영역 다 차지 */
+  min-height: 120px;              /* 높이 확보 */
+`;
 
 export const ItemTextTitle = styled.div`
-  color: #2D736C;
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 6px;
-`
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d736c;
+  margin-bottom: 10px;
+`;
 
 export const ItemTextDetail = styled.div`
+  font-size: 15px;
   color: #444;
-  font-size: 14px;
-  line-height: 1.4;
-`
+  line-height: 1.7;
+`;
+
+export const ItemMeta = styled.div`
+  font-size: 13px;
+  color: #777;
+  align-self: flex-end; /* 오른쪽 정렬 */
+`;

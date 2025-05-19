@@ -30,18 +30,34 @@ export const lostQuery = `
 
     type Query {
         fetchAllLost: [Lost]
+        fetchPage: Int
+        fetchPageLost(page: Int!, pageSize: Int!): [Lost]
     }
 
     type Mutation {
         createLost(createLostInput: CreateLostInput): Int
     }
 `
+export const fetchPage = async () => {
+    const result = await Lost.count();
+    return result;
+}
 
 export const fetchAllLost = async () => {
-    const result = Lost.findAll({ include: ['person'] });
+    const result = await Lost.findAll({ include: ['person'] });
 
     return result;
 }
+
+export const fetchPageLost = async (_, { page, pageSize }) => {
+    const offset = (page - 1) * pageSize;
+    const result = await Lost.findAll({
+      offset,
+      limit: pageSize,
+      order: [['lost_date', 'DESC']]  // 원하는 정렬 기준
+    });
+    return result;
+};
 
 export const createLost = async (parent, args, context, info) => {
     const result = await Lost.create({

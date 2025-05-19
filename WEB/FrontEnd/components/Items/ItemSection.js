@@ -1,43 +1,29 @@
 import * as Styles from './ItemSectionStyle.js';
+import LostItemCard from './LostItemCard.js';
 
 export default function LostItemsSection() {
   return (
     <Styles.ItemsWrapper>
-        <Styles.Item>
-            <Styles.ItemImage></Styles.ItemImage>
-            <Styles.ItemText>
-              <Styles.ItemTextTitle>분실물 1</Styles.ItemTextTitle>
-              <Styles.ItemTextDetail>분실물 1의 설명입니다. 분실물 1의 설명입니다. 분실물 1의 설명입니다.</Styles.ItemTextDetail>
-            </Styles.ItemText>
-        </Styles.Item>
-        <Styles.Item>
-            <Styles.ItemImage></Styles.ItemImage>
-            <Styles.ItemText>
-              <Styles.ItemTextTitle>분실물 2</Styles.ItemTextTitle>
-              <Styles.ItemTextDetail>분실물 2의 설명입니다. 분실물 2의 설명입니다. 분실물 2의 설명입니다.</Styles.ItemTextDetail>
-            </Styles.ItemText>
-        </Styles.Item>
-        <Styles.Item>
-            <Styles.ItemImage></Styles.ItemImage>
-            <Styles.ItemText>
-              <Styles.ItemTextTitle>분실물 3</Styles.ItemTextTitle>
-              <Styles.ItemTextDetail>분실물 3의 설명입니다. 분실물 3의 설명입니다. 분실물 3의 설명입니다.</Styles.ItemTextDetail>
-            </Styles.ItemText>
-        </Styles.Item>
-        <Styles.Item>
-            <Styles.ItemImage></Styles.ItemImage>
-            <Styles.ItemText>
-              <Styles.ItemTextTitle>분실물 4</Styles.ItemTextTitle>
-              <Styles.ItemTextDetail>분실물 4의 설명입니다. 분실물 4의 설명입니다. 분실물 4의 설명입니다.</Styles.ItemTextDetail>
-            </Styles.ItemText>
-        </Styles.Item>
-        <Styles.Item>
-            <Styles.ItemImage></Styles.ItemImage>
-            <Styles.ItemText>
-              <Styles.ItemTextTitle>분실물 5</Styles.ItemTextTitle>
-              <Styles.ItemTextDetail>분실물 5의 설명입니다. 분실물 5의 설명입니다. 분실물 5의 설명입니다.</Styles.ItemTextDetail>
-            </Styles.ItemText>
-        </Styles.Item>
+      <LostItemCard
+        title="흰색 우산"
+        location="도서관"
+        date="2025-04-15"
+      />
+      <LostItemCard
+        title="검정 우산"
+        location="도서관"
+        date="2025-04-15"
+      />
+      <LostItemCard
+        title="지갑"
+        location="도서관"
+        date="2025-04-15"
+      />
+      <LostItemCard
+        title="노트북"
+        location="도서관"
+        date="2025-04-15"
+      />
     </Styles.ItemsWrapper>
   );
 }

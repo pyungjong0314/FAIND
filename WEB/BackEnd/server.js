@@ -2,7 +2,7 @@ import { sequelize } from './sequelizeInstance.js';
 import { ApolloServer } from '@apollo/server';
 import {startStandaloneServer} from '@apollo/server/standalone';
 import { personQuery, fetchPersons, createPerson } from './Controller/personController.js';
-import { lostQuery, fetchAllLost, createLost } from './Controller/lostController.js';
+import { lostQuery, fetchAllLost, createLost, fetchPage, fetchPageLost } from './Controller/lostController.js';
 
 
 // API-DOCS
@@ -15,7 +15,9 @@ const typeDefs = `#graphql
 const resolvers = {
     Query: {
         fetchPersons,
-        fetchAllLost
+        fetchAllLost,
+        fetchPage,
+        fetchPageLost
     },
 
     Mutation: {

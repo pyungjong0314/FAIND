@@ -8,7 +8,7 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 0;
+  padding: 20px 0;
 `
 
 export const LogoWrapper = styled.div`
