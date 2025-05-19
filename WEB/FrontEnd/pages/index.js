@@ -1,8 +1,7 @@
 import Head from "next/head";
-import * as Styles from "../components/Home/homeStyle.js"
+import WrapperSection from "../components/Wrapper/WrapperSection.js";
 import HomeSection from "../components/Home/homeComponent.js";
 import SearchSection from "../components/Search/SearchSectionComponent.js";
-import LostItemsSection from "../components/Items/ItemSection.js";
 
 export default function Home() {
   return (
@@ -14,13 +13,10 @@ export default function Home() {
         <link rel="icon" href="/logo.png" />
       </Head>
 
-      <Styles.Wrapper>
+      <WrapperSection>
         <HomeSection />
-
         <SearchSection />
-        
-        <LostItemsSection />
-      </Styles.Wrapper>
+      </WrapperSection>
       
     </>
   );

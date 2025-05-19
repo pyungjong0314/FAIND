@@ -1,4 +1,4 @@
-import SearchSectionUI from "./SearchSectionUi.js"
+import SearchSectionUI from "./SearchSectionUI.js"
 
 export default function SearchSection() {
 

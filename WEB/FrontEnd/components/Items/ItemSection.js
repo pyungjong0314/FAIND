@@ -1,29 +1,45 @@
 import * as Styles from './ItemSectionStyle.js';
 import LostItemCard from './LostItemCard.js';
+import { useQuery, gql } from '@apollo/client';
 
-export default function LostItemsSection() {
-  return (
+const PageLostGraphql = gql`
+  query FetchPageLost($page: Int!, $pageSize: Int!) {
+      fetchPageLost(page: $page, pageSize: $pageSize) {
+        id
+        lost_name
+        lost_location
+        lost_date
+      }
+    }
+`
+
+export function formatDate(timestamp) {
+
+  return new Date(Number(timestamp)).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+
+export default function LostItemsSection({currentPage, pageSize}) {
+  const {data} = useQuery(PageLostGraphql, {
+    variables: {
+      page: currentPage,
+      pageSize: pageSize
+    }
+  })
+
+  return (    
     <Styles.ItemsWrapper>
-      <LostItemCard
-        title="흰색 우산"
-        location="도서관"
-        date="2025-04-15"
-      />
-      <LostItemCard
-        title="검정 우산"
-        location="도서관"
-        date="2025-04-15"
-      />
-      <LostItemCard
-        title="지갑"
-        location="도서관"
-        date="2025-04-15"
-      />
-      <LostItemCard
-        title="노트북"
-        location="도서관"
-        date="2025-04-15"
-      />
+      {data?.fetchPageLost.map((item) => (
+        <LostItemCard
+          key={item.id}
+          title={item.lost_name}
+          location={item.lost_location}
+          date={formatDate(item.lost_date)}
+        />
+      ))}
     </Styles.ItemsWrapper>
   );
 }

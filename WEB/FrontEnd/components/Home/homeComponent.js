@@ -1,5 +1,6 @@
 import * as HomeStyles from './homeStyle.js'
 
+
 export default function HomeSection(){
 
     return (

@@ -54,7 +54,7 @@ export const fetchPageLost = async (_, { page, pageSize }) => {
     const result = await Lost.findAll({
       offset,
       limit: pageSize,
-      order: [['lost_date', 'DESC']]  // 원하는 정렬 기준
+      order: [['lost_date', 'DESC'], ['id', 'DESC']],  // 원하는 정렬 기준
     });
     return result;
 };
