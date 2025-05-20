@@ -161,7 +161,12 @@ while True:
     # 10분마다 having 상태 확인
     if (now - last_candidate_check).total_seconds() >= candidate_check_interval:
         for tid, obj in list(candidate_objects.items()):
-            if not obj.having:
+            if obj.having: # 다시 having 상태로 돌아가면 1씩 줄어듦
+                obj.count = max(0, obj.count - 1)
+                if obj.count == 0:
+                    candidate_objects.pop(tid)
+            
+            else:
                 obj.count += 1
                 if obj.count >= 3:
                     lost_objects[tid] = obj
