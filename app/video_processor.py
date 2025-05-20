@@ -28,6 +28,7 @@ PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
 os.makedirs("images", exist_ok=True) # 사람 이미지 저장할 디렉토리 생성
 os.makedirs("images/items", exist_ok=True) # 소지품 이미지 저장할 디렉토리 생성
 
+desired_classes = ['backpack', 'umbrella']
 
 def is_overlapping(box1, box2):
     x1_min, y1_min, x1_max, y1_max = box1
@@ -76,6 +77,8 @@ def process_video():
             if class_name == "person":
                 detections.append((bbox, confidence, class_id))
             else:
+                if class_name not in desired_classes:
+                    continue
                 detected_items.append((class_name, bbox))  # 소지품 저장
 
         tracks = tracker.update_tracks(detections, frame=frame)
