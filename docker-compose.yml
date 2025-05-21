@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  yolo_door:
+    container_name: yolo_door
+    build: ./yolo_door
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./yolo_door/app:/app/app
+    restart: unless-stopped
+
+  yolo_inner:
+    container_name: yolo_inner
+    build: ./yolo_inner
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./yolo_inner/app:/app/app
+    restart: unless-stopped
