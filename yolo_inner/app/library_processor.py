@@ -2,6 +2,7 @@ import cv2
 import time
 from datetime import datetime
 from ultralytics import YOLO
+from notifier import send_lost_to_web_server
 import json
 
 
@@ -31,6 +32,7 @@ def calculate_distance(box1, box2):
     y2_center = (box2[1] + box2[3]) / 2
     return ((x1_center - x2_center) ** 2 + (y1_center - y2_center) ** 2) ** 0.5
 
+
 def get_lost_objects_json():
     return json.dumps([
         {
@@ -40,7 +42,6 @@ def get_lost_objects_json():
         }
         for obj in lost_objects.values()
     ], indent=4)
-
 
 
 model = YOLO("yolov8x.pt")
@@ -62,14 +63,14 @@ lost_objects = {}
 latest_tracked_boxes = []  # 유지할 바운딩 박스 저장용
 
 
-
 def run_inference(frame):
     global tracked_objects, candidate_objects, lost_objects, last_detection_time, latest_tracked_boxes
 
     last_detection_time = datetime.now()
     results = model.track(frame, persist=True)[0]
     boxes = results.boxes
-    latest_tracked_boxes = [box for box in boxes if results.names[int(box.cls[0])] not in non_objects]  # 유효 객체만 저장
+    latest_tracked_boxes = [box for box in boxes if results.names[int(
+        box.cls[0])] not in non_objects]  # 유효 객체만 저장
     current_ids = set()
 
     people_boxes = []
@@ -101,7 +102,8 @@ def run_inference(frame):
                 label += "-Not Having"
                 color = (0, 0, 255)
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv2.putText(frame, label, (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
     for box in object_boxes:
         track_id = int(box.id[0])
@@ -110,16 +112,19 @@ def run_inference(frame):
         current_ids.add(track_id)
 
         if track_id not in tracked_objects:
-            tracked_objects[track_id] = TrackedObject(track_id, class_name, bbox)
+            tracked_objects[track_id] = TrackedObject(
+                track_id, class_name, bbox)
 
         obj = tracked_objects[track_id]
-        near_person = any(calculate_distance(bbox, p.xyxy[0].tolist()) < threshold_distance for p in people_boxes)
+        near_person = any(calculate_distance(
+            bbox, p.xyxy[0].tolist()) < threshold_distance for p in people_boxes)
         obj.update_having(near_person)
 
     for tid in list(tracked_objects):
         if tid not in current_ids:
             tracked_objects.pop(tid, None)
             candidate_objects.pop(tid, None)
+
 
 # -------------------------------
 # 메인 루프
@@ -156,16 +161,17 @@ while True:
             label += "-Not Having"
             color = (0, 0, 255)
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        cv2.putText(frame, label, (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
     # 10분마다 having 상태 확인
     if (now - last_candidate_check).total_seconds() >= candidate_check_interval:
         for tid, obj in list(candidate_objects.items()):
-            if obj.having: # 다시 having 상태로 돌아가면 1씩 줄어듦
+            if obj.having:  # 다시 having 상태로 돌아가면 1씩 줄어듦
                 obj.count = max(0, obj.count - 1)
                 if obj.count == 0:
                     candidate_objects.pop(tid)
-            
+
             else:
                 obj.count += 1
                 if obj.count >= 3:
@@ -188,3 +194,6 @@ cv2.destroyAllWindows()
 
 # 결과 출력
 print(get_lost_objects_json())
+
+# 웹 서버 전송
+send_lost_to_web_server(get_lost_objects_json())
