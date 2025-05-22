@@ -39,7 +39,7 @@ export const Label = styled.label`
 `;
 
 export const Input = styled.input`
-  padding: 12px 14px;
+  padding: 12px 12px;
   font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -50,6 +50,27 @@ export const Input = styled.input`
   &:focus {
     border-color: #2d736c;
     background-color: #fff;
+  }
+`;
+
+export const Select = styled.select`
+  padding: 12px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fafafa;
+  transition: border-color 0.2s;
+  outline: none;
+  color: #333;
+
+  &:focus {
+    border-color: #2d736c;
+    background-color: #fff;
+  }
+
+  /* ✅ 처음 선택 안 된 상태일 때 글자 흐리게 */
+  &:invalid {
+    color: #999;
   }
 `;
 

@@ -3,16 +3,25 @@ import { useState, useEffect } from 'react'
 import { useQuery, gql } from '@apollo/client'
 import PageSection from '../Page/PageComponent'
 import LostItemsSection from "../Items/ItemSection"
+import SearchSection from "../Search/SearchSection"
 
 const PageCountGraphql = gql`
-    query {
-        fetchPage
-    }   
+  query fetchPage($filter: LostFilterInput) {
+    fetchPage(filter: $filter)
+  }
 `;
 
 export default function WrapperSection({children}) {
     const [page, setPage] = useState(1)
-    const {data} = useQuery(PageCountGraphql)
+    const [filter, setFilter] = useState({
+        lost_name: '',
+        lost_location: '',
+        lost_date: ''
+      });
+    
+    const {data} = useQuery(PageCountGraphql, {
+        variables: {filter}
+    })
     const [totalPage, setTotalPage] = useState(1)
     const pageSize = 4;
 
@@ -24,13 +33,21 @@ export default function WrapperSection({children}) {
       }
     }, [data]);
 
+    const handleSearch = (newFilter) => {
+        setFilter(newFilter);
+        setPage(1);
+    };
+
     return (
         <Styles.Wrapper>
             {children}
             
+            <SearchSection onSearch={handleSearch} />
+
             <LostItemsSection
                 currentPage={page}
                 pageSize={pageSize}
+                filter={filter}
             />
 
             <PageSection

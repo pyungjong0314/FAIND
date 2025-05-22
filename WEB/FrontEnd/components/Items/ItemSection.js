@@ -3,8 +3,8 @@ import LostItemCard from './LostItemCard.js';
 import { useQuery, gql } from '@apollo/client';
 
 const PageLostGraphql = gql`
-  query FetchPageLost($page: Int!, $pageSize: Int!) {
-      fetchPageLost(page: $page, pageSize: $pageSize) {
+  query FetchPageLost($page: Int!, $pageSize: Int!, $filter: LostFilterInput) {
+    fetchPageLost(page: $page, pageSize: $pageSize, filter: $filter) {
         id
         lost_name
         lost_location
@@ -22,11 +22,12 @@ export function formatDate(timestamp) {
   });
 }
 
-export default function LostItemsSection({currentPage, pageSize}) {
+export default function LostItemsSection({currentPage, pageSize, filter}) {
   const {data} = useQuery(PageLostGraphql, {
     variables: {
       page: currentPage,
-      pageSize: pageSize
+      pageSize: pageSize,
+      filter: filter
     }
   })
 

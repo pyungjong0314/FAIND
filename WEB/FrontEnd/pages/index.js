@@ -1,7 +1,7 @@
 import Head from "next/head";
 import WrapperSection from "../components/Wrapper/WrapperSection.js";
 import HomeSection from "../components/Home/homeComponent.js";
-import SearchSection from "../components/Search/SearchSectionComponent.js";
+import SearchSection from "../components/Search/SearchSection.js";
 
 export default function Home() {
   return (
@@ -15,7 +15,6 @@ export default function Home() {
 
       <WrapperSection>
         <HomeSection />
-        <SearchSection />
       </WrapperSection>
       
     </>
