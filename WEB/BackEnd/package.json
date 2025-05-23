@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@apollo/server": "^4.12.1",
+    "apollo-server": "^3.13.0",
+    "graphql": "^16.11.0",
+    "pg": "^8.16.0",
+    "sequelize": "^6.37.7"
+  }
+}
