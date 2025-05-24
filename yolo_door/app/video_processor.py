@@ -6,7 +6,7 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 from utils import apply_mosaic_to_head, extract_feature_vector
 from models import Person
 from db_manager import save_entry_to_db, find_matching_person, compare_items
-from notifier import send_alert_to_main_server
+from notifier import post_item_to_main_server
 import os
 
 # YOLO 모델 및 추적기 초기화
@@ -23,29 +23,17 @@ GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
 RED = (0, 0, 255)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
-
 os.makedirs("images", exist_ok=True)
 os.makedirs("images/items", exist_ok=True)
 
 desired_classes = ['backpack', 'umbrella']
 
 
-def is_overlapping(box1, box2):
-    x1_min, y1_min, x1_max, y1_max = box1
-    x2_min, y2_min, x2_max, y2_max = box2
-    return not (x1_max < x2_min or x2_max < x1_min or y1_max < y2_min or y2_max < y1_min)
-
-
 def process_test_by_video():  # 영상으로 테스트하는 버전
-    video_cap = cv2.VideoCapture("test_video5.mp4")
+    video_cap = cv2.VideoCapture("test_video2.mp4")
     ret, frame = video_cap.read()
     if not ret:
         return {"status": "Error: 영상 파일을 읽을 수 없습니다."}
-    frame_width = frame.shape[1]
-    OUTSIDE_LINE = frame_width // 3
-    INSIDE_LINE = (frame_width * 2) // 3
 
     while True:
         ret, frame = video_cap.read()
@@ -64,10 +52,9 @@ def process_test_by_video():  # 영상으로 테스트하는 버전
 def process_frame(frame):
     global OUTSIDE_LINE, INSIDE_LINE, persons, exit_persons, entry_persons
 
-    if 'OUTSIDE_LINE' not in globals() or 'INSIDE_LINE' not in globals():
-        frame_width = frame.shape[1]
-        OUTSIDE_LINE = frame_width // 3
-        INSIDE_LINE = (frame_width * 2) // 3
+    frame_width = frame.shape[1]
+    OUTSIDE_LINE = frame_width // 3
+    INSIDE_LINE = (frame_width * 2) // 3
 
     results = model(frame)[0]
     detections = []
@@ -99,7 +86,7 @@ def process_frame(frame):
             persons[track_id] = Person(track_id, center_x)
 
         person = persons[track_id]
-        person.update_position(center_x)
+        person.update_position(center_x) # line 넘었는지 확인하고 방향 판정.
 
         for item_name, (ixmin, iymin, iwidth, iheight) in detected_items:
             ixmax = ixmin + iwidth
@@ -128,24 +115,18 @@ def process_frame(frame):
             cv2.imwrite(save_path, frame_copy[ymin:ymax, xmin:xmax])
             item_names = list(person.items.keys())
             if person.direction == "entry":
-                save_entry_to_db(track_id, "entry",
+                save_entry_to_db(track_id, person.direction,
                                  person.feature_vector, save_path, item_names)
                 entry_persons.append({"image": filename, "items": item_names})
-            elif person.direction == "exit":
+            elif person.direction == "exit": # 나가는 사람 발생시 비교.
                 matched_entry = find_matching_person(person.feature_vector)
                 if matched_entry:
-                    missing_items = compare_items(
-                        matched_entry.items, item_names)
-                    print(
-                        f"[ALERT] Person {matched_entry.id} missing: {missing_items}")
+                    missing_items = compare_items(matched_entry.items, item_names)
+                    print(f"[ALERT] Person {matched_entry.id} missing: {missing_items}")
                     if missing_items:
-                        send_alert_to_main_server(
-                            matched_entry.id, missing_items)
-                    exit_persons.append(
-                        {"image": filename, "items": item_names, "missing": missing_items})
+                        post_item_to_main_server(datetime.now(), "도서관 내부 어딘가", missing_items)
                 else:
-                    exit_persons.append(
-                        {"image": filename, "items": item_names})
+                    print("일치하는 사람이 없다? 이상하다?")
             person.passed_lines.append(person.direction)
 
     cv2.imshow("YOLO Tracking", frame)

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.routes import router
+from routes import router
 from websocket_handler import ws_router
 
 app = FastAPI(title="YOLO Door Server")

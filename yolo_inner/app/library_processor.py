@@ -4,7 +4,10 @@ from datetime import datetime
 from ultralytics import YOLO
 from notifier import send_lost_to_web_server
 import json
+import os
 
+os.makedirs("images", exist_ok=True)
+os.makedirs("images/items", exist_ok=True)
 
 class TrackedObject:
     def __init__(self, object_id, class_name, last_position):
@@ -177,7 +180,20 @@ while True:
                 if obj.count >= 3:
                     lost_objects[tid] = obj
                     candidate_objects.pop(tid, None)
-
+                    
+                    # 이미지 저장
+                    for box in latest_tracked_boxes:
+                        if int(box.id[0]) == tid:
+                            x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+                            item_crop = frame[y1:y2, x1:x2]
+                            if item_crop.size != 0:
+                                timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+                                filename = f"library_{obj.class_name}_{timestamp_str}.jpg"
+                                save_path = os.path.join("images/items", filename)
+                                cv2.imwrite(save_path, item_crop)
+                                print(f"[INFO] 분실물 이미지 저장 완료: {save_path}")
+                            break
+                        
         for tid, obj in tracked_objects.items():
             if not obj.having and tid not in lost_objects:
                 candidate_objects[tid] = obj
