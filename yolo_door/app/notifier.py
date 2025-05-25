@@ -1,7 +1,7 @@
 import requests
 from dotenv import load_dotenv
 
-url = "http://223.194.45.67:4000/graphql"  # 여기에 GraphQL 서버 주소를 입력
+url = "http://localhost:4000/graphql"  # 여기에 GraphQL 서버 주소를 입력
 headers = {"Content-Type": "application/json"}
 
 
