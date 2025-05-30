@@ -9,7 +9,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from utils import extract_feature_vector, compute_cosine_similarity
 
 # 슈퍼유저 계정으로 설정
-DB_HOST = "localhost"
+DB_HOST = "host.docker.internal" # 로컬에서 돌릴 때는 localhost로 변경.
 DB_PORT = "5432"
 DB_NAME = "yolo_db"
 DB_USER = "postgres"

@@ -59,7 +59,7 @@ start_frame_processor()
 
 
 def process_test_by_video():  # 영상으로 테스트하는 버전
-    video_cap = cv2.VideoCapture("test_video2.mp4")
+    video_cap = cv2.VideoCapture("entrance_video2.mp4")
     ret, frame = video_cap.read()
     if not ret:
         return {"status": "Error: 영상 파일을 읽을 수 없습니다."}
@@ -153,8 +153,8 @@ def process_frame(frame):
                     missing_items = compare_items(matched_entry.items, item_names)
                     print(f"[ALERT] Person {matched_entry.id} missing: {missing_items}")
                     if missing_items:
-                        notify_admin_lost_items(datetime.now(), "도서관 내부 어딘가", missing_items)
-                        post_item_to_main_server(datetime.now(), "도서관 내부 어딘가", missing_items)
+                        notify_admin_lost_items(datetime.datetime.now(), "도서관 내부 어딘가", missing_items)
+                        post_item_to_main_server(datetime.datetime.now(), "도서관 내부 어딘가", missing_items)
                         send_faind_email(
                             subject="FAIND - 분실물 감지 알림",
                             item_name=missing_items,
@@ -190,6 +190,6 @@ def process_frame(frame):
     # frame_resized = cv2.resize(frame, (width, height))
     # cv2.imshow("YOLO Tracking", frame_resized)
     
-    cv2.imshow("YOLO Tracking", frame)
+    #cv2.imshow("YOLO Tracking", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         return

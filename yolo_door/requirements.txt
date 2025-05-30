@@ -17,5 +17,6 @@ cython
 h5py
 faiss-cpu
 lap
+websockets
 # Torchreid는 GitHub에서 직접 설치
 git+https://github.com/KaiyangZhou/deep-person-reid.git

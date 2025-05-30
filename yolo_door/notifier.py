@@ -5,7 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-url = "http://localhost:4000/graphql"  # 여기에 GraphQL 서버 주소를 입력
+url = "http://host.docker.internal:4000/graphql"  # 여기에 GraphQL 서버 주소를 입력 docker 내부에서는 localhost가 host.docker.internal로 바뀜.
 headers = {"Content-Type": "application/json"}
 
 
