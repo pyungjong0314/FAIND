@@ -9,6 +9,7 @@ const PageLostGraphql = gql`
         lost_name
         lost_location
         lost_date
+        lost_image
       }
     }
 `
@@ -39,6 +40,7 @@ export default function LostItemsSection({currentPage, pageSize, filter}) {
           title={item.lost_name}
           location={item.lost_location}
           date={formatDate(item.lost_date)}
+          image={item.lost_image}
         />
       ))}
     </Styles.ItemsWrapper>

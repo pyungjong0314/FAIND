@@ -29,11 +29,10 @@ const resolvers = {
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    cors: true,
-
-    // cors: {
-    //     origin: ["http://naver.com"]
-    // }
+    cors: {
+      origin: ['https://faind-tau.vercel.app'], // 허용할 도메인
+      credentials: true,
+    },
 });
 
 async function initialize() {
