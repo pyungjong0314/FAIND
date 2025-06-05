@@ -27,6 +27,10 @@ Lost.init({
         allowNull: false,
         defaultValue: 'found'
     },
+    lost_image: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     person_id: {
         type: DataTypes.INTEGER,
         allowNull: false,

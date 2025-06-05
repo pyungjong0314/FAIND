@@ -38,6 +38,15 @@ export const ItemImage = styled.div`
   flex-shrink: 0;
   margin-right: 24px;
 
+  ${({ image }) =>
+    image && image !== 'null' && image !== 'undefined'
+      ? `
+        background-image: url(${image});
+        background-size: cover;
+        background-position: center;
+      `
+      : ''}
+
   @media (max-width: 600px) {
     margin-right: 0;
     margin-bottom: 14px;

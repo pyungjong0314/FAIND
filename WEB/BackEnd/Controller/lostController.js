@@ -26,7 +26,9 @@ function buildWhere(filter = {}){
     return where;
 }
 
+
 export const lostQuery = `
+
     type Person {
         id: Int
         input_time: String
@@ -50,6 +52,7 @@ export const lostQuery = `
         lost_location: String
         lost_date: String
         status: statusEnum
+        lost_image: String
         person: Person
     }
 
@@ -58,6 +61,7 @@ export const lostQuery = `
         lost_location: String
         lost_date: String
         status: statusEnum
+        lost_image: String
         person_id: Int
     }
 
@@ -103,11 +107,14 @@ export const fetchPageLost = async (_, { page, pageSize, filter }) => {
 };
 
 export const createLost = async (parent, args, context, info) => {
+    const imageIp = "http://223.194.45.67:8002/";
+
     const result = await Lost.create({
         lost_name: args.createLostInput.lost_name,
         lost_location: args.createLostInput.lost_location,
         lost_date: args.createLostInput.lost_date,
         status: args.createLostInput.status,
+        lost_image: imageIp + args.createLostInput.lost_image,
         person_id: args.createLostInput.person_id
     });
 
