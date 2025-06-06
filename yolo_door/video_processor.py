@@ -11,6 +11,7 @@ import os
 import threading
 import queue
 from alert_manager import notify_admin_lost_items
+import uuid
 
 # YOLO 모델 및 추적기 초기화
 model = YOLO("yolov8n.pt")
@@ -122,13 +123,35 @@ def process_frame(frame):
             iymax = iymin + iheight
             item_center_x = (ixmin + ixmax) // 2
 
-            if OUTSIDE_LINE <= item_center_x <= INSIDE_LINE:
+            if OUTSIDE_LINE <= item_center_x <= INSIDE_LINE: # 소지품 저장.
                 if item_name not in person.items:
-                    person.items[item_name] = (ixmin, iymin, ixmax, iymax)
-                    item_crop = frame[int(iymin):int(
-                        iymax), int(ixmin):int(ixmax)]
+                    uuid_str = uuid.uuid4().hex[:8]
+                    person.items[item_name] = (ixmin, iymin, ixmax, iymax, uuid_str)
+
+                    # 원래 bbox 사이즈 계산
+                    cx = (ixmin + ixmax) / 2
+                    cy = (iymin + iymax) / 2
+                    bw = ixmax - ixmin
+                    bh = iymax - iymin
+                    size = max(bw, bh)
+
+                    # 정사각형 좌표 계산 (중심 기준)
+                    square_xmin = int(cx - size / 2)
+                    square_ymin = int(cy - size / 2)
+                    square_xmax = int(cx + size / 2)
+                    square_ymax = int(cy + size / 2)
+
+                    # 이미지 경계 보정
+                    h, w, _ = frame.shape
+                    square_xmin = max(square_xmin, 0)
+                    square_ymin = max(square_ymin, 0)
+                    square_xmax = min(square_xmax, w)
+                    square_ymax = min(square_ymax, h)
+
+                    item_crop = frame[square_ymin:square_ymax, square_xmin:square_xmax]
+
                     if item_crop.size != 0:
-                        item_filename = f"{track_id}_{item_name}.jpg"
+                        item_filename = f"{uuid_str}_{item_name}.jpg"
                         cv2.imwrite(f"images/items/{item_filename}", item_crop)
 
         if person.direction and person.direction not in person.passed_lines:
@@ -136,29 +159,34 @@ def process_frame(frame):
             person_crop = frame_copy[ymin:ymax, xmin:xmax]
             if person_crop.size == 0:
                 continue
+            
+            # 잘라낸 사람 이미지로 feature vector 생성.
             person.feature_vector = extract_feature_vector(person_crop)
-            frame_copy = apply_mosaic_to_head(
-                frame_copy, xmin, ymin, xmax, ymax)
+            
+            # 잘라낸 사람 이미지는 모자이크 처리
+            frame_copy = apply_mosaic_to_head(frame_copy, xmin, ymin, xmax, ymax)
             filename = f"{person.direction}_{track_id}.jpg"
             save_path = os.path.abspath(f"images/{filename}")
             cv2.imwrite(save_path, frame_copy[ymin:ymax, xmin:xmax])
-            item_names = list(person.items.keys())
+            item_uuid_dict = {
+                item_name: item_data[-1]
+                for item_name, item_data in person.items.items()
+            }
             if person.direction == "entry":
-                save_entry_to_db(track_id, person.direction,
-                                 person.feature_vector, save_path, item_names)
-                entry_persons.append({"image": filename, "items": item_names})
+                save_entry_to_db(track_id, person.direction, person.feature_vector, save_path, item_uuid_dict, datetime.datetime.now())
+                entry_persons.append({"image": filename, "items": item_uuid_dict})
             elif person.direction == "exit":  # 나가는 사람 발생시 비교.
                 matched_entry = find_matching_person(person.feature_vector)
                 if matched_entry:
-                    missing_items = compare_items(matched_entry.items, item_names)
+                    missing_items = compare_items(list((matched_entry.items).keys()), list(item_uuid_dict.keys()))
                     print(f"[ALERT] Person {matched_entry.id} missing: {missing_items}")
                     if missing_items:
-                        notify_admin_lost_items(datetime.datetime.now(), "도서관 내부 어딘가", missing_items)
-                        post_item_to_main_server(datetime.datetime.now(), "도서관 내부 어딘가", missing_items)
+                        notify_admin_lost_items(datetime.datetime.now(), "열람실", missing_items)
+                        post_item_to_main_server(datetime.datetime.now(), "열람실", missing_items, matched_entry.items)
                         send_faind_email(
                             subject="FAIND - 분실물 감지 알림",
                             item_name=missing_items,
-                            location="도서관 내부",
+                            location="열람실",
                             timestamp=datetime.datetime.now(),
                             to_email = "sonopj@kw.ac.kr",
                             from_email = "2025kwchambit@gmail.com",
@@ -173,7 +201,7 @@ def process_frame(frame):
         cv2.putText(frame, f"{track_id} - person", (xmin + 5, ymin - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
         
         # 각 사람의 소지품 bbox 그리기
-        for item_name, (ixmin, iymin, ixmax, iymax) in person.items.items():
+        for item_name, (ixmin, iymin, ixmax, iymax, uuid_str) in person.items.items():
             cv2.rectangle(frame, (int(ixmin), int(iymin)), (int(ixmax), int(iymax)), RED, 2)
             cv2.putText(frame, f"{track_id} - {item_name}", (int(ixmin) + 5, int(iymin) - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 2)
 

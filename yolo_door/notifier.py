@@ -9,7 +9,7 @@ url = "http://host.docker.internal:4000/graphql"  # 여기에 GraphQL 서버 주
 headers = {"Content-Type": "application/json"}
 
 
-def post_item_to_main_server(timestamp, location, missing_items ):
+def post_item_to_main_server(timestamp, location, missing_items, items_detail):
     for item in missing_items:
         data = {
             "query": """
@@ -19,11 +19,12 @@ def post_item_to_main_server(timestamp, location, missing_items ):
             """,
             "variables": {
                 "createLostInput": {
-                    "lost_date": timestamp.isoformat(),
-                    "lost_location": location,
                     "lost_name": CLASS_NAME_KOR.get(item, item), # 영어에서 한국어로 바꿔줌
+                    "lost_location": location,
+                    "lost_date": timestamp.isoformat(),
+                    "status": "found", # found가 분실물인 것.
+                    "lost_image": f"images/items/{items_detail[item]}_{item}.jpg",
                     "person_id": 1, # 추후에 광운대 학생/외부인 구분 예정.
-                    "status": "found" # found가 분실물인 것.
                 }
             }
         }
@@ -82,7 +83,7 @@ def send_faind_email(subject, item_name, location, timestamp, to_email, from_ema
                 <div class="body">
                     <p><span class="highlight">{location}</span>에서 <span class="highlight">{item_name}</span>이(가) 분실된 것으로 감지되었습니다.</p>
                     <p>감지 시각: <span class="highlight">{timestamp}</span></p>
-                    <p>해당 위치를 확인하여 분실 여부를 확인해 주세요.</p>
+                    <p>https://faind-ten.vercel.app/ 에서 확인하실 수 있습니다.</p>
                 </div>
                 <div class="footer">
                     이 메일은 FAIND 분실물 탐지 시스템에 의해 자동으로 발송되었습니다.

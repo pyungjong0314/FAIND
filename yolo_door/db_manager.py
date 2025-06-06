@@ -51,10 +51,10 @@ class PersonEntry(Base):
     feature_vector = Column(Vector(512))
     image_path = Column(String)
     items = Column(JSON)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now())
 
 # 입장하는 사람 저장
-def save_entry_to_db(track_id, direction, feature_vector, image_path, items):
+def save_entry_to_db(track_id, direction, feature_vector, image_path, items, current_time):
     session = SessionLocal()
     person = PersonEntry(
         track_id=track_id,
@@ -62,6 +62,7 @@ def save_entry_to_db(track_id, direction, feature_vector, image_path, items):
         feature_vector=feature_vector,
         image_path=image_path,
         items=items,
+        timestamp=current_time,
     )
     session.add(person)
     session.commit()
