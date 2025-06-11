@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+opencv-python
+numpy
+ultralytics
+torch
+tqdm
+python-dotenv
+requests

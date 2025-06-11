@@ -1,0 +1,108 @@
+# ----------------------------
+# OS: Windows
+# ----------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ----------------------------
+# OS: macOS
+# ----------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# ----------------------------
+# Python
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.log
+*.sqlite3
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+*.ipynb_checkpoints
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+ENV.bak/
+
+# Poetry
+poetry.lock
+
+# PyInstaller
+*.spec
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# ----------------------------
+# Visual Studio Code
+# ----------------------------
+.vscode/
+
+# ----------------------------
+# Docker
+# ----------------------------
+*.tar
+*.bak
+*.cache
+docker-compose.override.yml
+**/.dockerignore
+
+# Docker volumes (bind mounts)
+saved_images/
+
+# ----------------------------
+# YOLO specific (Ultralytics or custom)
+# ----------------------------
+runs/
+weights/
+yolov5/runs/
+*.pt
+*.onnx
+*.engine
+
+# ----------------------------
+# Node.js (if frontend uses it)
+# ----------------------------
+node_modules/
+*.log
+
+# ----------------------------
+# Secrets / Credentials / Env files
+# ----------------------------
+.env
+.env.*
+credentials.json
+secrets.yaml
+*.key
+*.pem
+*.crt
+
+# ----------------------------
+# IDEs
+# ----------------------------
+.idea/
+*.swp
+*.swo
+
+# ----------------------------
+# Others
+# ----------------------------
+*.tmp
+*.bak
+*.orig
