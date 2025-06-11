@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./yolo_door/app:/app/app
+      - ./yolo_door:/app
     restart: unless-stopped
 
   yolo_inner:
@@ -16,5 +16,5 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - ./yolo_inner/app:/app/app
+      - ./yolo_inner:/app
     restart: unless-stopped
